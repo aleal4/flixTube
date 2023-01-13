@@ -1,6 +1,5 @@
 const express = require("express");
-const fs = require("fs");
-const path = require("path");
+const http = require("http")
 
 const app = express();
 
@@ -15,26 +14,28 @@ if (!process.env.PORT) {
 // Extracts the PORT environment variable.
 //
 const PORT = process.env.PORT;
+const VIDEO_STORAGE_HOST = process.env.VIDEO_STORAGE_HOST
+const VIDEO_STORAGE_PORT = parseInt(process.env.VIDEO_STORAGE_PORT)
 
 //
 // Registers a HTTP GET route for video streaming.
 //
 app.get("/video", (req, res) => {
-
-    const videoPath = path.join("./videos", "SampleVideo_1280x720_1mb.mp4");
-    fs.stat(videoPath, (err, stats) => {
-        if (err) {
-            console.error("An error occurred ");
-            res.sendStatus(500);
-            return;
+    const forwardRequest = http.request( // Forward the request to the video storage microservice.
+        {
+            host: VIDEO_STORAGE_HOST,
+            port: VIDEO_STORAGE_PORT,
+            path: '/video?path=SampleVideo_1280x720_1mb.mp4', // Video path is hard-coded for the moment.
+            method: 'GET',
+            headers: req.headers
+        }, 
+        forwardResponse => {
+            res.writeHeader(forwardResponse.statusCode, forwardResponse.headers);
+            forwardResponse.pipe(res);
         }
-
-        res.writeHead(200, {
-            "Content-Length": stats.size,
-            "Content-Type": "video/mp4",
-        });
-        fs.createReadStream(videoPath).pipe(res);
-    });
+    );
+    
+    req.pipe(forwardRequest);
 });
 
 //
