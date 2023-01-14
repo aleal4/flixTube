@@ -4,8 +4,8 @@ services:
   db:
     image: mongo:4.2.8
     container_name: db
-    ports: 
-      - "4000:27017"
+    ports:
+     - "4000:27017"
     restart: always
 
   azure-storage:
@@ -29,11 +29,13 @@ services:
       dockerfile: Dockerfile
     container_name: video-streaming
     ports:
-     - "4002:3000"
+     - "4002:80"
     environment:
       - PORT=80
       - DBHOST=mongodb://db:27017
       - DBNAME=video-streaming
       - VIDEO_STORAGE_HOST=video-storage
       - VIDEO_STORAGE_PORT=80
+    depends_on:
+      - db
     restart: "no"
