@@ -12,7 +12,8 @@
   "license": "MIT",
   "dependencies": {
     "amqplib": "^0.10.3",
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "wait-port": "^1.0.4"
   },
   "devDependencies": {
     "nodemon": "^1.19.1"
